@@ -51,7 +51,11 @@ What it can't prove: Linux browsers aren't iOS Safari. Glass rendering, the shar
    - Build command: `npm run build`
    - Build output directory: `dist`
    - Environment variable: `NODE_VERSION` = `22`
-3. Save and deploy. No Functions or Workers are used; it's static files only. `public/_headers` sets the CSP, `nosniff`, `no-referrer`, a locked-down `Permissions-Policy`, `no-cache` on `index.html`, `sw.js` and the manifest, and a year of immutable caching on hashed `/assets/*`.
+3. Save and deploy. The build log should end with `Bundle audit passed`.
+
+**Black screen and a blank Home Screen icon?** The build settings above are missing, so Cloudflare is serving the source instead of `dist/`. Check: `https://<your-site>/icons/apple-touch-icon.png` should be an image, not a page. Fix the settings, retry the deployment, then delete the icon on the phone and add it again (iOS keeps the icon from when it was added).
+
+No Functions or Workers are used; it's static files only. `public/_headers` sets the CSP, `nosniff`, `no-referrer`, a locked-down `Permissions-Policy`, `no-cache` on `index.html`, `sw.js` and the manifest, and a year of immutable caching on hashed `/assets/*`.
 
 ### Add to Home Screen on iPhone
 
