@@ -75,28 +75,9 @@ export function Editor() {
     return { top: probe.offsetTop + TOP_CHROME, bottom: probe.offsetHeight + BOTTOM_CHROME };
   };
 
-  const resample = (v: CanvasView) => {
-    const host = root.current;
-    if (!host) return;
-    const hr = host.getBoundingClientRect();
-    const els = [closeEl.current, nameEl.current, actionsEl.current, toolbarEl.current].filter(Boolean) as HTMLElement[];
-    const regions = els.map((el) => {
-      const r = el.getBoundingClientRect();
-      return { x: r.left - hr.left, y: r.top - hr.top, w: r.width, h: r.height };
-    });
-    const tones = v.sampleTones(regions, 0.1);
-    els.forEach((el, i) => {
-      const target = el.classList.contains('glass') ? el : ((el.querySelector('.glass') as HTMLElement | null) ?? el);
-      target.dataset.tone = tones[i].tone;
-      target.style.setProperty('--glass-alpha', String(tones[i].alpha));
-      target.style.setProperty('--glass-shade', tones[i].tone === 'light' ? '0 0 0' : '40 40 60');
-    });
-  };
-
   // One view for the editor's lifetime; photos are swapped into it.
   useLayoutEffect(() => {
     const v = new CanvasView(canvasRef.current!, {
-      onSettle: resample,
       onChange: (cv) => setZoomText(`${cv.vt.percent}%`),
     });
     view.current = v;
@@ -280,7 +261,6 @@ export function Editor() {
         <header class="editor-top">
           <div ref={closeEl} class="editor-left">
             <GlassGroup
-              clear
               buttons={[
                 { icon: 'xmark', aria: docs.value.length > 1 ? 'Close this photo' : 'Close', onClick: () => void closePhoto() },
                 { icon: 'grid', aria: `All photos, ${docs.value.length} open`, onClick: () => setSwitcher(true) },
@@ -292,7 +272,7 @@ export function Editor() {
               </span>
             )}
           </div>
-          <button ref={nameEl} type="button" class="editor-name glass clear" aria-label={`Rename ${doc.name}`} onClick={() => void rename()} {...pressHandlers()}>
+          <button ref={nameEl} type="button" class="editor-name glass" aria-label={`Rename ${doc.name}`} onClick={() => void rename()} {...pressHandlers()}>
             <span class="editor-name-text">{doc.name}</span>
             <span class="editor-zoom t-num" aria-live="off">
               {zoomText}
@@ -300,7 +280,6 @@ export function Editor() {
           </button>
           <div ref={actionsEl}>
             <GlassGroup
-              clear
               buttons={[
                 { icon: 'undo', aria: 'Undo', disabled: !doc.history.canUndo || toolOwnsUndo, onClick: () => void undo(false) },
                 { icon: 'redo', aria: 'Redo', disabled: !doc.history.canRedo || toolOwnsUndo, onClick: () => void undo(true) },

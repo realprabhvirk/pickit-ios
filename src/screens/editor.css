@@ -1,6 +1,21 @@
 .editor {
   background: var(--canvas-bg);
 }
+/*
+ * Chrome over the photo keeps one look per appearance (light glass, dark icons in light mode;
+ * dark glass, light icons in dark mode). It's more solid than glass elsewhere so it stays
+ * readable over any photo without changing colour as you zoom and pan.
+ */
+.editor-top .glass,
+.editor .toolbar {
+  --glass-tint-a: 0.72;
+}
+@media (prefers-color-scheme: dark) {
+  .editor-top .glass,
+  .editor .toolbar {
+    --glass-tint-a: 0.74;
+  }
+}
 .safe-probe {
   position: absolute;
   top: var(--safe-top);

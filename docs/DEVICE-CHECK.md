@@ -54,7 +54,7 @@ Playwright runs on Linux and isn't iOS Safari. These need an iPhone. Deploy firs
 ## 9. Look and feel
 
 - [ ] Status bar readable on the picker, Settings and editor, light and dark (light screens have a dark scrim behind it). Say if the scrim looks wrong.
-- [ ] Glass readable over a bright photo and a dark one; icons flip between black and white.
+- [ ] Editor buttons readable over a bright photo and a dark one, and they keep the same look while zooming (light glass in light mode, dark in dark mode).
 - [ ] Text in the name capsule at the top is sharp, not soft.
 - [ ] Gestures: pinch, pan and flick feel smooth; sheets drag and flick between half and full height; Settings swipes back from the left edge.
 - [ ] Rotate to landscape: a polite notice, nothing broken.

@@ -11,13 +11,12 @@
  *
  * Variants
  *   .glass            Regular: more blur and tint, for readable controls anywhere.
- *   .glass.clear      Clear: more transparent, for controls over the photo. Pair with data-tone.
+ *   .glass.clear      Clear: more transparent. Set data-tone="light" (white glyphs) or
+ *                     data-tone="dark" (black glyphs) for the content it sits on.
  *   .glass.tinted     Prominent: filled with the app tint, for the primary action.
  *
- * Over a photo, the app samples luminance behind each control and sets
- *   data-tone="light"  (photo behind is dark  -> white foreground)
- *   data-tone="dark"   (photo behind is bright -> black foreground)
- * and --glass-alpha, the extra scrim needed for 4.5:1 contrast. See engine/legibility.ts.
+ * Chrome over the photo uses Regular glass that follows the system appearance, made more solid
+ * in the editor so it reads over any photo (see editor.css).
  */
 :root {
   --glass-blur: blur(18px) saturate(1.8) brightness(1.05);

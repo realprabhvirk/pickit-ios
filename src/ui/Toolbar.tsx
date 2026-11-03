@@ -12,19 +12,17 @@ interface ToolbarProps<T extends string> {
   items: ToolItem<T>[];
   active?: T | null;
   onSelect: (id: T, el: HTMLElement) => void;
-  tone?: 'light' | 'dark';
   toolbarRef?: (el: HTMLDivElement | null) => void;
   label?: string;
 }
 
 /**
  * Floating glass toolbar, concentric with the display corners. Scrolls sideways when the tools
- * don't fit. Uses Clear glass because it sits on the photo; `tone` comes from the luminance
- * sampled behind it.
+ * don't fit. Follows the system appearance: light glass in light mode, dark in dark mode.
  */
-export function Toolbar<T extends string>({ items, active, onSelect, tone, toolbarRef, label = 'Tools' }: ToolbarProps<T>) {
+export function Toolbar<T extends string>({ items, active, onSelect, toolbarRef, label = 'Tools' }: ToolbarProps<T>) {
   return (
-    <div ref={toolbarRef} class="toolbar glass clear" data-tone={tone} role="toolbar" aria-label={label}>
+    <div ref={toolbarRef} class="toolbar glass" role="toolbar" aria-label={label}>
       <div class="toolbar-scroll">
         {items.map((t) => (
           <button

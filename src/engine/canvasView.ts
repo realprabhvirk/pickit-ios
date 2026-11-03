@@ -1,6 +1,5 @@
 import { SpringValue, VelocityTracker, rubberband, springs, unrubberband } from '../design/motion';
 import { ViewTransform, type Insets } from './viewTransform';
-import { decideTone, luminances, type Tone, type ToneDecision } from './legibility';
 
 type Level = ImageBitmap | HTMLCanvasElement;
 
@@ -13,7 +12,6 @@ const SMALLEST_SIDE = 128;
 
 /** Pencil pressure when there is one; a steady middle value for fingers and mice. */
 const pressureOf = (e: PointerEvent) => (e.pointerType === 'pen' && e.pressure > 0 ? e.pressure : 0.5);
-const SAMPLE_SIDE = 256;
 const DOUBLE_TAP_MS = 300;
 const DOUBLE_TAP_SLOP = 30;
 const DECAY_PER_MS = 0.998;
@@ -46,7 +44,6 @@ export class CanvasView {
   readonly vt = new ViewTransform();
   private ctx: CanvasRenderingContext2D;
   private levels: Level[] = [];
-  private thumb: HTMLCanvasElement | null = null;
   private raf = 0;
   private bg = '#000';
   private ro: ResizeObserver;
@@ -65,7 +62,6 @@ export class CanvasView {
   private settleTo = { z: 1, x: 0, y: 0 };
   private settleTimer = 0;
   private destroyed = false;
-  private tones: (Tone | undefined)[] = [];
   private overlays = new Set<Overlay>();
   private listeners = new Set<(v: CanvasView) => void>();
   private rebuildTimer = 0;
@@ -211,42 +207,6 @@ export class CanvasView {
     const from = this.state();
     this.vt.fit();
     this.animateState(from, this.state(), true);
-  }
-
-  /** Luminance-based tone and scrim for each control area (CSS px relative to the canvas). */
-  sampleTones(regions: { x: number; y: number; w: number; h: number }[], baseAlpha: number): ToneDecision[] {
-    const out: ToneDecision[] = [];
-    const vw = this.vt.viewportWidth;
-    const vh = this.vt.viewportHeight;
-    if (!vw || !vh || !this.thumb) return regions.map(() => ({ tone: 'light', alpha: baseAlpha }));
-    const k = 1 / 8;
-    const sw = Math.max(1, Math.ceil(vw * k));
-    const sh = Math.max(1, Math.ceil(vh * k));
-    const c = document.createElement('canvas');
-    c.width = sw;
-    c.height = sh;
-    const sctx = c.getContext('2d', { willReadFrequently: true })!;
-    sctx.fillStyle = this.bg;
-    sctx.fillRect(0, 0, sw, sh);
-    sctx.drawImage(
-      this.thumb,
-      this.vt.offsetX * k,
-      this.vt.offsetY * k,
-      this.vt.imageWidth * this.vt.zoom * k,
-      this.vt.imageHeight * this.vt.zoom * k,
-    );
-    regions.forEach((r, i) => {
-      const x = Math.max(0, Math.floor(r.x * k));
-      const y = Math.max(0, Math.floor(r.y * k));
-      const w = Math.max(1, Math.min(sw - x, Math.ceil(r.w * k)));
-      const h = Math.max(1, Math.min(sh - y, Math.ceil(r.h * k)));
-      const data = sctx.getImageData(x, y, w, h).data;
-      const d = decideTone(luminances(data), baseAlpha, this.tones[i]);
-      this.tones[i] = d.tone;
-      out.push(d);
-    });
-    c.width = c.height = 0;
-    return out;
   }
 
   get hasImage() {
@@ -434,23 +394,10 @@ export class CanvasView {
         this.requestRender();
         setTimeout(step, 0);
       } else {
-        this.buildThumb();
         this.queueSettle();
       }
     };
     setTimeout(step, 16);
-  }
-
-  private buildThumb() {
-    const smallest = this.levels.reduce((a, b) => (b.width >= SAMPLE_SIDE || b.height >= SAMPLE_SIDE ? b : a), this.levels[0]);
-    const scale = Math.min(1, SAMPLE_SIDE / Math.max(smallest.width, smallest.height));
-    const c = document.createElement('canvas');
-    c.width = Math.max(1, Math.round(smallest.width * scale));
-    c.height = Math.max(1, Math.round(smallest.height * scale));
-    const cx = c.getContext('2d', { willReadFrequently: true })!;
-    cx.drawImage(smallest, 0, 0, c.width, c.height);
-    if (this.thumb) this.thumb.width = this.thumb.height = 0;
-    this.thumb = c;
   }
 
   private freeLevels() {
@@ -459,8 +406,6 @@ export class CanvasView {
       if (l instanceof HTMLCanvasElement) l.width = l.height = 0;
     }
     this.levels = [];
-    if (this.thumb) this.thumb.width = this.thumb.height = 0;
-    this.thumb = null;
   }
 
   // ---------- gestures ----------
@@ -832,7 +777,7 @@ export class CanvasView {
     if (!this.bounceX.animating && !this.bounceY.animating && !this.momentum) this.queueSettle();
   }
 
-  /** Report rest once nothing has moved for a beat (used to resample glass legibility). */
+  /** Report rest once nothing has moved for a beat. */
   private queueSettle() {
     clearTimeout(this.settleTimer);
     this.settleTimer = window.setTimeout(() => {
