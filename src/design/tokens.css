@@ -1,0 +1,149 @@
+/*
+ * iOS system colours, geometry and type, as CSS custom properties.
+ * Light values first; dark values switch with prefers-color-scheme. The app never overrides
+ * the system appearance.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* System colours */
+  --blue: #007aff;
+  --green: #34c759;
+  --red: #ff3b30;
+  --orange: #ff9500;
+  --yellow: #ffcc00;
+  --indigo: #5856d6;
+  --purple: #af52de;
+  --pink: #ff2d55;
+  --gray: #8e8e93;
+
+  --bg: #ffffff; /* systemBackground */
+  --bg-2: #f2f2f7; /* secondarySystemBackground */
+  --bg-3: #ffffff; /* tertiarySystemBackground */
+  --grouped-bg: #f2f2f7; /* systemGroupedBackground */
+  --grouped-bg-2: #ffffff; /* secondarySystemGroupedBackground */
+  --grouped-bg-3: #f2f2f7; /* tertiarySystemGroupedBackground */
+
+  --label: #000000;
+  --label-2: rgba(60, 60, 67, 0.6);
+  --label-3: rgba(60, 60, 67, 0.3);
+  --label-4: rgba(60, 60, 67, 0.18);
+  --separator: rgba(60, 60, 67, 0.29);
+  --separator-opaque: #c6c6c8;
+
+  --fill: rgba(120, 120, 128, 0.2);
+  --fill-2: rgba(120, 120, 128, 0.16);
+  --fill-3: rgba(120, 120, 128, 0.12);
+  --fill-4: rgba(116, 116, 128, 0.08);
+
+  /* App tint. Settings can swap it for another system colour (see [data-tint] below). */
+  --tint: var(--blue);
+  --tint-on: #ffffff; /* label colour on a tint-filled control */
+
+  /* Editor surround: the canvas sits on this. */
+  --canvas-bg: #f2f2f7;
+
+  /* Geometry (points == CSS px on iPhone). Reference: iPhone 14 Pro. */
+  --screen-radius: 55px;
+  --margin: 16px;
+  --touch: 44px;
+  --hairline: 0.5px;
+  --row-min: 44px;
+  --group-radius: 26px; /* iOS 26 grouped inset sections are rounder than before */
+  --sheet-radius: 36px;
+  --grabber-w: 36px;
+  --grabber-h: 5px;
+
+  /*
+   * Safe areas. The --sim-* values let a desktop browser or test preview the iPhone 14 Pro
+   * insets; on a real phone they stay 0 and env() wins.
+   */
+  --sim-top: 0px;
+  --sim-bottom: 0px;
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--sim-top));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--sim-bottom));
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /*
+   * Floating chrome near the bottom corners is concentric with the 55 pt display corner:
+   * gap = 55 - radius. A 64 pt toolbar (radius 32) therefore sits 23 pt from each edge.
+   */
+  --bar-h: 64px;
+  --bar-gap: calc(var(--screen-radius) - var(--bar-h) / 2);
+  --bar-bottom: max(calc(var(--safe-bottom) - 11px), 12px);
+
+  /* Type: rem follows the user's text size (html uses -apple-system-body; 1rem = 17 pt by default). */
+  --font: -apple-system, system-ui, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --font-rounded: ui-rounded, -apple-system, system-ui, 'SF Pro Rounded', 'Helvetica Neue', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --blue: #0a84ff;
+    --green: #30d158;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --yellow: #ffd60a;
+    --indigo: #5e5ce6;
+    --purple: #bf5af2;
+    --pink: #ff375f;
+    --gray: #8e8e93;
+
+    --bg: #000000;
+    --bg-2: #1c1c1e;
+    --bg-3: #2c2c2e;
+    --grouped-bg: #000000;
+    --grouped-bg-2: #1c1c1e;
+    --grouped-bg-3: #2c2c2e;
+
+    --label: #ffffff;
+    --label-2: rgba(235, 235, 245, 0.6);
+    --label-3: rgba(235, 235, 245, 0.3);
+    --label-4: rgba(235, 235, 245, 0.16);
+    --separator: rgba(84, 84, 88, 0.6);
+    --separator-opaque: #38383a;
+
+    --fill: rgba(120, 120, 128, 0.36);
+    --fill-2: rgba(120, 120, 128, 0.32);
+    --fill-3: rgba(118, 118, 128, 0.24);
+    --fill-4: rgba(118, 118, 128, 0.18);
+
+    --canvas-bg: #000000;
+  }
+}
+
+/* Tint choices from Settings. Each follows the light/dark value of its system colour. */
+:root[data-tint='indigo'] { --tint: var(--indigo); }
+:root[data-tint='purple'] { --tint: var(--purple); }
+:root[data-tint='pink'] { --tint: var(--pink); }
+:root[data-tint='red'] { --tint: var(--red); }
+:root[data-tint='orange'] { --tint: var(--orange); }
+:root[data-tint='yellow'] { --tint: var(--yellow); --tint-on: #000000; }
+:root[data-tint='green'] { --tint: var(--green); }
+:root[data-tint='gray'] { --tint: var(--gray); }
+
+/* Increase Contrast: iOS darkens or brightens system colours; follow suit for labels and separators. */
+@media (prefers-contrast: more) {
+  :root {
+    --label-2: rgba(60, 60, 67, 0.82);
+    --label-3: rgba(60, 60, 67, 0.62);
+    --separator: rgba(60, 60, 67, 0.55);
+    --blue: #0040dd;
+    --red: #d70015;
+    --green: #248a3d;
+    --orange: #c93400;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --label-2: rgba(235, 235, 245, 0.84);
+      --label-3: rgba(235, 235, 245, 0.62);
+      --separator: rgba(120, 120, 128, 0.8);
+      --blue: #409cff;
+      --red: #ff6961;
+      --green: #30db5b;
+      --orange: #ffb340;
+    }
+  }
+}

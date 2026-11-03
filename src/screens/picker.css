@@ -1,0 +1,147 @@
+.picker-scroll {
+  display: flex;
+  flex-direction: column;
+}
+.picker-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 0 40px calc(var(--safe-bottom) + 120px);
+  min-height: 360px;
+}
+.picker-empty-art {
+  font-size: 64px;
+  color: var(--label-3);
+  margin-bottom: 10px;
+}
+.picker-empty-art {
+  --icon-stroke: 1.05;
+}
+.picker-empty-text {
+  max-width: 290px;
+}
+
+/* Primary actions float in thumb reach, concentric with the bottom corners. */
+.picker-actions {
+  position: absolute;
+  left: var(--bar-gap);
+  right: var(--bar-gap);
+  bottom: var(--bar-bottom);
+  z-index: 50;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.picker-choose {
+  flex: 1;
+  height: 56px;
+  font-size: 1.0588rem;
+}
+.picker-actions .btn.large.circle {
+  width: 56px;
+  height: 56px;
+}
+.picker-actions .btn .icon {
+  font-size: 24px;
+}
+
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--tint) 10%, transparent);
+  pointer-events: none;
+}
+.drop-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 36px;
+  border-radius: 32px;
+  border: 2px dashed var(--tint);
+  color: var(--tint);
+  font-weight: 600;
+}
+.drop-target .icon {
+  font-size: 32px;
+}
+
+/* Install help */
+.install {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4px 8px 12px;
+  gap: 12px;
+}
+.install-icon img {
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.18), 0 0 0 0.5px rgb(0 0 0 / 0.08);
+}
+.install-title {
+  margin-top: 6px;
+  max-width: 300px;
+}
+.install-lead {
+  max-width: 320px;
+}
+.install-steps {
+  list-style: none;
+  margin: 10px 0 6px;
+  padding: 0;
+  width: 100%;
+  border-radius: 24px;
+  background: var(--glass-inner-fill);
+  text-align: left;
+}
+.install-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.install-step + .install-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 54px;
+  right: 0;
+  height: var(--hairline);
+  background: var(--glass-separator);
+}
+.install-num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--tint);
+  color: var(--tint-on);
+  font-family: var(--font-rounded);
+  font-size: 0.8235rem;
+  font-weight: 700;
+}
+.install-text {
+  flex: 1;
+  font-size: 0.9412rem;
+  line-height: 1.3;
+}
+.install-glyph {
+  flex: none;
+  font-size: 22px;
+  color: var(--tint);
+}
+.install-done {
+  width: 100%;
+  margin-top: 8px;
+}

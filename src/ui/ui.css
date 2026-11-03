@@ -1,0 +1,815 @@
+/* ---------- Icon ---------- */
+.icon {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  overflow: visible;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: var(--touch);
+  height: var(--touch);
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 1.0588rem; /* 18 pt glyph box for 17 pt text */
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--glass-fg, var(--label));
+  transition: opacity 160ms ease;
+}
+.btn .icon {
+  font-size: 22px;
+}
+.btn.circle {
+  width: var(--touch);
+  padding: 0;
+}
+.btn.large {
+  height: 50px;
+  min-width: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0 22px;
+}
+.btn.large.circle {
+  width: 50px;
+  padding: 0;
+}
+.btn:disabled {
+  opacity: 0.35;
+}
+.btn.plain {
+  color: var(--tint);
+}
+.btn.plain.pressed {
+  opacity: 0.4;
+  transition-duration: 0ms;
+}
+.btn.filled {
+  background: var(--tint);
+  color: var(--tint-on);
+}
+.btn.gray {
+  background: var(--fill-2);
+  color: var(--tint);
+}
+.btn.filled.pressed,
+.btn.gray.pressed {
+  opacity: 0.7;
+  transition-duration: 0ms;
+}
+.btn .btn-label {
+  font-size: 1rem;
+}
+
+/* A shared glass capsule holding several plain buttons (they morph together). */
+.glass-group {
+  display: inline-flex;
+  align-items: center;
+  height: var(--touch);
+  border-radius: 999px;
+  padding: 0 2px;
+}
+.glass-group > .btn {
+  color: inherit;
+}
+.glass-group > .btn::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: var(--glass-inner-fill-strong);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.2, 0.9, 0.25, 1.1);
+}
+.glass-group > .btn.pressed::before {
+  opacity: 1;
+  transform: scale(1);
+  transition-duration: 60ms;
+}
+
+/* ---------- Floating toolbar ---------- */
+.toolbar {
+  position: absolute;
+  left: var(--bar-gap);
+  right: var(--bar-gap);
+  bottom: var(--bar-bottom);
+  height: var(--bar-h);
+  border-radius: calc(var(--bar-h) / 2);
+  z-index: 50;
+  overflow: hidden;
+  transform-origin: 50% 100%;
+}
+.toolbar-scroll {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 0 6px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+.toolbar-scroll::-webkit-scrollbar {
+  display: none;
+}
+.tool {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 66px;
+  height: 56px;
+  border-radius: 28px;
+  scroll-snap-align: center;
+  color: inherit;
+}
+.tool .icon {
+  font-size: 24px;
+}
+.tool-label {
+  font-size: 10.5px;
+  line-height: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.tool::before {
+  content: '';
+  position: absolute;
+  inset: 2px 4px;
+  border-radius: 999px;
+  background: var(--glass-inner-fill-strong);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 200ms ease, transform 300ms cubic-bezier(0.2, 0.9, 0.25, 1.1);
+}
+.tool.pressed::before {
+  opacity: 1;
+  transform: scale(1);
+  transition-duration: 60ms;
+}
+.tool[aria-pressed='true'] {
+  color: var(--tint);
+}
+
+/* ---------- Sheet ---------- */
+.sheet-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+}
+.sheet-dim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+.sheet-layer.modal .sheet-dim {
+  pointer-events: auto;
+}
+.sheet {
+  --sheet-inset: 8px;
+  position: absolute;
+  left: var(--sheet-inset);
+  right: var(--sheet-inset);
+  bottom: calc(var(--sheet-inset) + var(--kb, 0px));
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--sheet-radius) var(--sheet-radius) calc(var(--screen-radius) - var(--sheet-inset)) calc(var(--screen-radius) - var(--sheet-inset));
+  pointer-events: auto;
+  contain: layout paint;
+  will-change: transform;
+  --glass-tint-a: 0.62;
+}
+@media (prefers-color-scheme: dark) {
+  .sheet {
+    --glass-tint-a: 0.55;
+  }
+}
+.sheet-header {
+  position: relative;
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 14px 6px;
+  min-height: 64px;
+  touch-action: none;
+  cursor: grab;
+}
+.sheet-grabber {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: var(--grabber-w);
+  height: var(--grabber-h);
+  margin-left: calc(var(--grabber-w) / -2);
+  border-radius: 999px;
+  background: var(--label-3);
+}
+.sheet-title {
+  grid-column: 2;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2941;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.sheet-leading {
+  grid-column: 1;
+  justify-self: start;
+}
+.sheet-trailing {
+  grid-column: 3;
+  justify-self: end;
+}
+.sheet-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 18px calc(18px + var(--safe-bottom));
+  scrollbar-width: none;
+}
+.sheet-body::-webkit-scrollbar {
+  display: none;
+}
+/* Circular header buttons inside a sheet use a flat fill (no glass in glass). */
+.sheet-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--glass-inner-fill);
+  color: var(--label);
+  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1.1), background-color 150ms;
+}
+.sheet-btn .icon {
+  font-size: 20px;
+}
+.sheet-btn.confirm {
+  background: var(--tint);
+  color: var(--tint-on);
+}
+.sheet-btn.pressed {
+  transform: scale(0.92);
+  transition-duration: 60ms;
+}
+
+/* ---------- Segmented control ---------- */
+.segmented {
+  --seg-h: 36px;
+  --seg-pad: 2px;
+  position: relative;
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  height: var(--seg-h);
+  padding: var(--seg-pad);
+  border-radius: 999px;
+  background: var(--fill-3);
+  touch-action: pan-y;
+}
+.segmented.on-glass {
+  background: var(--glass-inner-fill);
+}
+.seg-thumb {
+  position: absolute;
+  top: var(--seg-pad);
+  bottom: var(--seg-pad);
+  left: var(--seg-pad);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.12), 0 3px 1px rgb(0 0 0 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  will-change: transform;
+}
+@media (prefers-color-scheme: dark) {
+  .seg-thumb {
+    background: #636366;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.3);
+  }
+}
+.seg-item {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  border-radius: 999px;
+  font-size: 0.8235rem; /* 14 pt */
+  font-weight: 500;
+  color: var(--label);
+  transition: opacity 150ms;
+  white-space: nowrap;
+  padding: 0 6px;
+}
+.seg-item[aria-checked='true'] {
+  font-weight: 600;
+}
+.seg-item.pressed:not([aria-checked='true']) {
+  opacity: 0.5;
+}
+
+/* ---------- Switch ---------- */
+.switch {
+  --sw-w: 51px;
+  --sw-h: 31px;
+  --knob: 27px;
+  position: relative;
+  flex: none;
+  width: var(--sw-w);
+  height: var(--sw-h);
+  border-radius: 999px;
+  background: var(--fill);
+  transition: background-color 250ms ease;
+}
+.switch[aria-checked='true'] {
+  background: var(--green);
+}
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  height: var(--knob);
+  width: var(--knob);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 3px 1px rgb(0 0 0 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  transition:
+    transform 340ms var(--spring-snappy, cubic-bezier(0.2, 0.9, 0.25, 1.1)),
+    width 220ms var(--spring-snappy, cubic-bezier(0.2, 0.9, 0.25, 1.1));
+}
+.switch[aria-checked='true'] .switch-knob {
+  transform: translateX(calc(var(--sw-w) - var(--knob) - 4px));
+}
+.switch.pressed .switch-knob {
+  width: calc(var(--knob) + 8px);
+}
+.switch.pressed[aria-checked='true'] .switch-knob {
+  transform: translateX(calc(var(--sw-w) - var(--knob) - 12px));
+}
+.switch:disabled {
+  opacity: 0.4;
+}
+
+/* ---------- Slider ---------- */
+.slider {
+  --track-h: 6px;
+  --thumb-w: 38px;
+  --thumb-h: 24px;
+  --p: 0.5;
+  position: relative;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  touch-action: pan-y;
+}
+.slider-end {
+  flex: none;
+  color: var(--label-2);
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+}
+.slider-track {
+  position: relative;
+  flex: 1;
+  height: 44px;
+}
+.slider-rail,
+.slider-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: var(--track-h);
+  margin-top: calc(var(--track-h) / -2);
+  border-radius: 999px;
+}
+.slider-rail {
+  right: 0;
+  background: var(--fill);
+}
+.slider-fill {
+  width: calc(var(--thumb-w) / 2 + (100% - var(--thumb-w)) * var(--p));
+  background: var(--tint);
+}
+.slider-thumb {
+  position: absolute;
+  top: 50%;
+  left: calc((100% - var(--thumb-w)) * var(--p));
+  width: var(--thumb-w);
+  height: var(--thumb-h);
+  margin-top: calc(var(--thumb-h) / -2);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 3px 1px rgb(0 0 0 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.06);
+  transition: transform 300ms cubic-bezier(0.2, 0.9, 0.25, 1.1), background-color 200ms, box-shadow 200ms;
+  will-change: transform;
+}
+/*
+ * While dragging, the thumb becomes a "lens": larger and glassy. It sits inside sheets that are
+ * already glass, so it fakes the material with translucency and rim light instead of nesting a
+ * second backdrop-filter.
+ */
+.slider.dragging .slider-thumb {
+  transform: scale(1.45, 1.6);
+  background: rgb(255 255 255 / 0.28);
+  box-shadow:
+    inset 0.75px 1px 0 rgb(255 255 255 / 0.9),
+    inset -0.75px -1px 0 rgb(255 255 255 / 0.35),
+    inset 0 0 8px rgb(255 255 255 / 0.4),
+    0 4px 14px rgb(0 0 0 / 0.18);
+  transition-duration: 160ms;
+}
+
+/* ---------- Grouped inset list ---------- */
+.list {
+  padding: 0 var(--margin);
+}
+.section {
+  margin: 0 0 34px;
+}
+.section-header {
+  padding: 0 16px 7px;
+  font-size: 0.7647rem;
+  line-height: 1.3846;
+  color: var(--label-2);
+  text-transform: uppercase;
+}
+.section-body {
+  background: var(--grouped-bg-2);
+  border-radius: var(--group-radius);
+  overflow: hidden;
+}
+.section-footer {
+  padding: 7px 16px 0;
+  font-size: 0.7647rem;
+  line-height: 1.3846;
+  color: var(--label-2);
+}
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 16px;
+  text-align: left;
+  color: var(--label);
+  background: transparent;
+  transition: background-color 250ms ease;
+}
+.row.pressable.pressed {
+  background: var(--fill-3);
+  transition-duration: 0ms;
+}
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--sep-left, 16px);
+  height: var(--hairline);
+  background: var(--separator);
+}
+.row.has-icon {
+  --sep-left: 58px;
+}
+.row-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 19px;
+}
+.row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.row-title {
+  font-size: 1rem;
+  line-height: 1.2941;
+}
+.row-subtitle {
+  font-size: 0.7647rem;
+  line-height: 1.3846;
+  color: var(--label-2);
+}
+.row-detail {
+  flex: none;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--label-2);
+  font-size: 1rem;
+}
+.row-chevron {
+  flex: none;
+  margin-right: -4px;
+  font-size: 16px;
+  color: var(--label-3);
+}
+.row.destructive .row-title {
+  color: var(--red);
+}
+.row.tinted .row-title {
+  color: var(--tint);
+}
+.row-check {
+  flex: none;
+  font-size: 20px;
+  color: var(--tint);
+}
+.row.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* ---------- Navigation bar with a collapsing Large Title ---------- */
+.nav-scroll-top {
+  height: calc(var(--safe-top) + 52px);
+}
+.large-title {
+  padding: 2px 20px 14px;
+  transform-origin: 0 50%;
+}
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  height: calc(var(--safe-top) + 52px);
+  padding: var(--safe-top) var(--margin) 0;
+  display: grid;
+  grid-template-columns: minmax(44px, 1fr) auto minmax(44px, 1fr);
+  align-items: center;
+  pointer-events: none;
+}
+.navbar > * {
+  pointer-events: auto;
+}
+.navbar-title {
+  grid-column: 2;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 120ms linear;
+  pointer-events: none;
+}
+.navbar-leading {
+  grid-column: 1;
+  justify-self: start;
+}
+.navbar-trailing {
+  grid-column: 3;
+  justify-self: end;
+}
+/* iOS 26 scroll edge effect: content softens and fades under the bar instead of a hard divider. */
+.scroll-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--safe-top) + 64px);
+  z-index: 55;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms linear;
+  background: linear-gradient(
+    to bottom,
+    var(--edge-bg, var(--grouped-bg)) 0,
+    var(--edge-bg, var(--grouped-bg)) calc(var(--safe-top) + 34px),
+    color-mix(in srgb, var(--edge-bg, var(--grouped-bg)) 70%, transparent) calc(var(--safe-top) + 50px),
+    transparent 100%
+  );
+}
+.scroll-edge.on {
+  opacity: 1;
+}
+
+/* ---------- Menu (glass popover) ---------- */
+.menu-catcher {
+  position: absolute;
+  inset: 0;
+  z-index: 700;
+}
+.menu {
+  position: absolute;
+  min-width: 250px;
+  max-width: calc(100% - 32px);
+  border-radius: 26px;
+  padding: 6px 0;
+  z-index: 701;
+  --glass-tint-a: 0.6;
+}
+@media (prefers-color-scheme: dark) {
+  .menu {
+    --glass-tint-a: 0.5;
+  }
+}
+.menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 20px;
+  font-size: 1rem;
+  text-align: left;
+  color: var(--label);
+}
+.menu-item .icon {
+  font-size: 21px;
+  width: 22px;
+}
+.menu-item.pressed {
+  background: var(--glass-inner-fill-strong);
+}
+.menu-item.destructive {
+  color: var(--red);
+}
+.menu-item:disabled {
+  color: var(--label-3);
+}
+.menu-sep {
+  height: 8px;
+  margin: 4px 0;
+  background: var(--glass-inner-fill);
+}
+
+/* ---------- Alert ---------- */
+.alert-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 800;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.alert-dim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.22);
+}
+.alert {
+  position: relative;
+  width: min(300px, 100%);
+  border-radius: 34px;
+  padding: 22px 18px 16px;
+  text-align: center;
+  --glass-tint-a: 0.7;
+}
+@media (prefers-color-scheme: dark) {
+  .alert {
+    --glass-tint-a: 0.6;
+  }
+}
+.alert-title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2941;
+  padding: 0 6px;
+}
+.alert-message {
+  margin-top: 6px;
+  font-size: 0.7647rem;
+  line-height: 1.3846;
+  padding: 0 6px;
+}
+.alert-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.alert-actions.stacked {
+  flex-direction: column;
+}
+.alert-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 500;
+  background: var(--glass-inner-fill);
+  color: var(--label);
+  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1.1), opacity 150ms;
+}
+.alert-btn.preferred {
+  font-weight: 600;
+  background: var(--tint);
+  color: var(--tint-on);
+}
+.alert-btn.destructive {
+  color: var(--red);
+  font-weight: 600;
+}
+.alert-btn.pressed {
+  transform: scale(0.96);
+  transition-duration: 60ms;
+}
+
+/* ---------- Toast ---------- */
+.toast-layer {
+  position: absolute;
+  top: calc(var(--safe-top) + 6px);
+  left: 0;
+  right: 0;
+  z-index: 850;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  max-width: calc(100% - 32px);
+  padding: 6px 6px 6px 16px;
+  border-radius: 999px;
+  pointer-events: auto;
+  transform-origin: 50% 0;
+  --glass-tint-a: 0.6;
+}
+.toast .icon {
+  font-size: 22px;
+  color: var(--tint);
+}
+.toast-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 6px;
+}
+.toast-title {
+  font-size: 0.8824rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.toast-sub {
+  font-size: 0.7647rem;
+  line-height: 1.3;
+  color: var(--label-2);
+}
+.toast-action {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--tint-on);
+  font-size: 0.8824rem;
+  font-weight: 600;
+  transition: transform 200ms cubic-bezier(0.2, 0.9, 0.25, 1.1);
+}
+.toast-action.pressed {
+  transform: scale(0.94);
+}
+.toast-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--label-2);
+}
+.toast-close .icon {
+  font-size: 16px;
+  color: var(--label-2);
+}

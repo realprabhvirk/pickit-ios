@@ -1,0 +1,25 @@
+/*
+ * iOS text styles at the default content size (1rem = 17 pt). Sizes are rem so they follow the
+ * user's Dynamic Type setting through -apple-system-body on <html>. Control geometry stays in
+ * points, as in UIKit, so toolbars don't balloon at accessibility sizes.
+ *
+ * Letter-spacing is left to the system font: WebKit applies SF Pro's own size-specific tracking
+ * and optical sizes, and adding our own on top would double it.
+ */
+.t-large-title { font-size: 2rem; line-height: 1.2059; font-weight: 700; }      /* 34 / 41 */
+.t-title1 { font-size: 1.6471rem; line-height: 1.2143; font-weight: 400; }      /* 28 / 34 */
+.t-title2 { font-size: 1.2941rem; line-height: 1.2727; font-weight: 400; }      /* 22 / 28 */
+.t-title3 { font-size: 1.1765rem; line-height: 1.25; font-weight: 400; }        /* 20 / 25 */
+.t-headline { font-size: 1rem; line-height: 1.2941; font-weight: 600; }         /* 17 / 22 */
+.t-body { font-size: 1rem; line-height: 1.2941; font-weight: 400; }             /* 17 / 22 */
+.t-callout { font-size: 0.9412rem; line-height: 1.3125; font-weight: 400; }     /* 16 / 21 */
+.t-subheadline { font-size: 0.8824rem; line-height: 1.3333; font-weight: 400; } /* 15 / 20 */
+.t-footnote { font-size: 0.7647rem; line-height: 1.3846; font-weight: 400; }    /* 13 / 18 */
+.t-caption1 { font-size: 0.7059rem; line-height: 1.3333; font-weight: 400; }    /* 12 / 16 */
+.t-caption2 { font-size: 0.6471rem; line-height: 1.1818; font-weight: 400; }    /* 11 / 13 */
+
+.t-emph { font-weight: 600; }
+.t-secondary { color: var(--label-2); }
+.t-tertiary { color: var(--label-3); }
+.t-num { font-variant-numeric: tabular-nums; }
+.t-rounded { font-family: var(--font-rounded); }

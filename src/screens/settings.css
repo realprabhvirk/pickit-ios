@@ -1,0 +1,73 @@
+.tint-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+  justify-items: center;
+  padding: 4px 0 2px;
+}
+.tint-swatch {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--sw);
+  transition: transform 260ms cubic-bezier(0.2, 0.9, 0.25, 1.1);
+}
+.tint-swatch.pressed {
+  transform: scale(0.9);
+}
+.tint-swatch[aria-checked='true']::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 2.5px solid var(--sw);
+}
+.tint-swatch[aria-checked='true']::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.about-block {
+  padding: 14px 16px;
+  font-size: 0.9412rem;
+  line-height: 1.35;
+  color: var(--label);
+}
+.about-block p + p {
+  margin-top: 10px;
+}
+.about-block a {
+  color: var(--tint);
+  text-decoration: none;
+}
+.licence-name {
+  font-weight: 600;
+}
+.licence-meta {
+  font-size: 0.7647rem;
+  color: var(--label-2);
+}
+.status-ok {
+  color: var(--green);
+}
+.status-bad {
+  color: var(--red);
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 80px 40px;
+}
+.empty-state .icon {
+  font-size: 56px;
+  color: var(--label-3);
+  margin-bottom: 8px;
+  --icon-stroke: 1.1;
+}

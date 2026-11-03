@@ -1,0 +1,223 @@
+/*
+ * Liquid Glass, approximated for WebKit.
+ *
+ * Real Liquid Glass refracts what's behind it. WebKit has no backdrop-filter: url(#svg), so this
+ * is blur + saturation + brightness for the body, layered inset shadows for the edge light, a
+ * ::before specular sheen that follows --tilt, and a 0.5 pt gradient rim drawn with a mask.
+ *
+ * Rules: glass is only for chrome floating above content. Never put a .glass inside a .glass
+ * (nested backdrop-filter renders badly in WebKit); inside glass, use the flat fills
+ * (--glass-inner-fill). Never animate the blur radius; move glass with transform/opacity only.
+ *
+ * Variants
+ *   .glass            Regular: more blur and tint, for readable controls anywhere.
+ *   .glass.clear      Clear: more transparent, for controls over the photo. Pair with data-tone.
+ *   .glass.tinted     Prominent: filled with the app tint, for the primary action.
+ *
+ * Over a photo, the app samples luminance behind each control and sets
+ *   data-tone="light"  (photo behind is dark  -> white foreground)
+ *   data-tone="dark"   (photo behind is bright -> black foreground)
+ * and --glass-alpha, the extra scrim needed for 4.5:1 contrast. See engine/legibility.ts.
+ */
+:root {
+  --glass-blur: blur(18px) saturate(1.8) brightness(1.05);
+  --glass-blur-clear: blur(12px) saturate(1.6) brightness(1.08);
+  --glass-tint: 255 255 255;
+  --glass-tint-a: 0.28;
+  --glass-fg: var(--label);
+  --glass-rim-hi: rgba(255, 255, 255, 0.7);
+  --glass-rim-lo: rgba(255, 255, 255, 0.16);
+  --glass-glow: rgba(255, 255, 255, 0.22);
+  --glass-shade: 40 40 60; /* outer shadow colour, retinted from content behind where known */
+  --glass-inner-fill: rgba(120, 120, 128, 0.14);
+  --glass-inner-fill-strong: rgba(120, 120, 128, 0.22);
+  --glass-separator: rgba(60, 60, 67, 0.18);
+  --tilt-x: 0;
+  --tilt-y: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-tint: 30 30 32;
+    --glass-tint-a: 0.34;
+    --glass-rim-hi: rgba(255, 255, 255, 0.32);
+    --glass-rim-lo: rgba(255, 255, 255, 0.06);
+    --glass-glow: rgba(255, 255, 255, 0.07);
+    --glass-shade: 0 0 0;
+    --glass-inner-fill: rgba(120, 120, 128, 0.24);
+    --glass-inner-fill-strong: rgba(120, 120, 128, 0.34);
+    --glass-separator: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.glass {
+  --_a: var(--glass-alpha, var(--glass-tint-a));
+  position: relative;
+  isolation: isolate;
+  color: var(--glass-fg);
+  background: rgb(var(--glass-tint) / var(--_a));
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    inset 0.75px 1px 0 0 var(--glass-rim-hi),
+    inset -0.75px -1px 0 0 var(--glass-rim-lo),
+    inset 0 0 14px 0 var(--glass-glow),
+    0 10px 30px -8px rgb(var(--glass-shade) / 0.22),
+    0 2px 6px -1px rgb(var(--glass-shade) / 0.1);
+  /* Own compositing layer; keeps the backdrop sample stable while siblings repaint. */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Specular sheen. Moves with --tilt-x / --tilt-y (pointer on desktop, device motion if enabled). */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at calc(22% + var(--tilt-x) * 30%) calc(0% + var(--tilt-y) * 30%),
+      rgba(255, 255, 255, 0.34),
+      rgba(255, 255, 255, 0) 55%
+    ),
+    linear-gradient(
+      calc(160deg + var(--tilt-x) * 25deg),
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0) 45%,
+      rgba(255, 255, 255, 0) 75%,
+      rgba(255, 255, 255, 0.08)
+    );
+  opacity: 0.9;
+}
+
+/* 0.5 pt gradient rim, brightest top-left like light catching the edge. */
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 0.5px;
+  pointer-events: none;
+  background: linear-gradient(
+    calc(135deg + var(--tilt-x) * 20deg),
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.12) 40%,
+    rgba(255, 255, 255, 0.05) 60%,
+    rgba(255, 255, 255, 0.45)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass::before { opacity: 0.45; }
+  .glass::after { opacity: 0.55; }
+}
+
+/* Clear: for controls sitting directly on the photo. */
+.glass.clear {
+  --glass-tint-a: 0.1;
+  -webkit-backdrop-filter: var(--glass-blur-clear);
+  backdrop-filter: var(--glass-blur-clear);
+}
+.glass.clear[data-tone='light'] {
+  --glass-tint: 18 18 20;
+  --glass-fg: #ffffff;
+  --glass-rim-hi: rgba(255, 255, 255, 0.4);
+  --glass-rim-lo: rgba(255, 255, 255, 0.08);
+  --glass-glow: rgba(255, 255, 255, 0.06);
+  --glass-inner-fill: rgba(255, 255, 255, 0.14);
+  --glass-separator: rgba(255, 255, 255, 0.16);
+}
+.glass.clear[data-tone='dark'] {
+  --glass-tint: 255 255 255;
+  --glass-fg: #000000;
+  --glass-rim-hi: rgba(255, 255, 255, 0.85);
+  --glass-rim-lo: rgba(255, 255, 255, 0.25);
+  --glass-inner-fill: rgba(0, 0, 0, 0.08);
+  --glass-separator: rgba(0, 0, 0, 0.12);
+}
+
+/* Prominent: tint-filled glass for the primary action. */
+.glass.tinted {
+  color: var(--tint-on);
+  background: color-mix(in srgb, var(--tint) 88%, transparent);
+  --glass-rim-hi: rgba(255, 255, 255, 0.5);
+  --glass-glow: rgba(255, 255, 255, 0.16);
+}
+
+/* Interactive glass: on press it swells slightly and a highlight blooms under the finger. */
+.glass.interactive {
+  transition: transform 260ms var(--spring-snappy, cubic-bezier(0.2, 0.9, 0.25, 1.1));
+}
+.glass.interactive::before {
+  background:
+    radial-gradient(70px circle at var(--press-x, 50%) var(--press-y, 50%), rgba(255, 255, 255, var(--press-a, 0)), transparent 70%),
+    radial-gradient(120% 90% at calc(22% + var(--tilt-x) * 30%) calc(0% + var(--tilt-y) * 30%), rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 55%);
+}
+.glass.interactive.pressed {
+  --press-a: 0.35;
+  transform: translateZ(0) scale(1.06);
+  transition-duration: 120ms;
+}
+
+/* Content inside glass uses flat fills, never another glass. */
+.glass .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--glass-inner-fill);
+  box-shadow: none;
+}
+.glass .glass::before,
+.glass .glass::after {
+  display: none;
+}
+
+/*
+ * Fallbacks: same geometry, opaque system materials.
+ */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass { background: var(--bg-2); }
+  .glass.clear[data-tone='light'] { background: rgb(28 28 30 / 0.92); }
+  .glass.clear[data-tone='dark'] { background: rgb(242 242 247 / 0.94); }
+  .glass.tinted { background: var(--tint); }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass.clear {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--bg-2);
+  }
+  .glass.clear[data-tone='light'] { background: #1c1c1e; }
+  .glass.clear[data-tone='dark'] { background: #f2f2f7; }
+  .glass.tinted { background: var(--tint); }
+  .glass::before { display: none; }
+}
+
+@media (prefers-contrast: more) {
+  .glass,
+  .glass.clear {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--bg-2);
+    box-shadow: 0 0 0 1px var(--separator-opaque), 0 6px 18px -6px rgb(0 0 0 / 0.3);
+  }
+  .glass.clear[data-tone='light'] { background: #1c1c1e; box-shadow: 0 0 0 1px #636366; }
+  .glass.clear[data-tone='dark'] { background: #f2f2f7; box-shadow: 0 0 0 1px #8e8e93; }
+  .glass.tinted { background: var(--tint); }
+  .glass::before,
+  .glass::after { display: none; }
+}
+
+/* Manual switch from Settings > Accessibility-style fallback, also used by tests. */
+:root[data-glass='off'] .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--bg-2);
+}

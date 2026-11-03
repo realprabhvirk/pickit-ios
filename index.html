@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>PicKit</title>
+    <meta name="description" content="Crop, resize, mark up, compress and clean up photos. Works offline, and nothing leaves your iPhone." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="PicKit" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="%STATUS_BAR_STYLE%" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
+
+    <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- iPhone 14 Pro launch images: 1179 x 2556 px, light and dark -->
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash/iphone-14-pro-light.png"
+      media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash/iphone-14-pro-dark.png"
+      media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>PicKit needs JavaScript to run.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

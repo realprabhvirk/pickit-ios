@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!--
+    PicKit app icon. Two crop corners framing a photo: editing, and picking the part you want.
+    Full-bleed square; iOS applies its own corner mask. The glyph stays inside the 80% safe
+    zone so the same art works as a maskable icon.
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A2B30"/>
+      <stop offset="1" stop-color="#0D0E10"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#FFD60A"/>
+      <stop offset="1" stop-color="#FF8A00"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.32"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="tileClip"><rect x="340" y="340" width="344" height="344" rx="76"/></clipPath>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#rim)"/>
+  <g clip-path="url(#tileClip)">
+    <rect x="340" y="340" width="344" height="344" fill="url(#tile)"/>
+    <circle cx="594" cy="440" r="40" fill="#FFFFFF" fill-opacity="0.95"/>
+    <path d="M330 640 L452 518 L540 598 L602 540 L700 640 V700 H330 Z" fill="#FFFFFF" fill-opacity="0.9"/>
+    <rect x="340" y="340" width="344" height="344" fill="url(#sheen)"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="66" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M252 452 V318 Q252 252 318 252 H452"/>
+    <path d="M772 572 V706 Q772 772 706 772 H572"/>
+  </g>
+</svg>
