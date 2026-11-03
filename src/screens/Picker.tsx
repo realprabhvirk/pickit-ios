@@ -1,41 +1,60 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { currentImage } from '../app/editorState';
+import { closeAll, docs, openFiles } from '../app/docs';
 import { pushScreen, topScreen } from '../app/nav';
 import { openMenu, showAlert, showToast } from '../app/overlays';
 import { isStandalone } from '../app/env';
 import { openInstallHelp } from '../app/installHelp';
-import { decodeFile, ImageOpenError } from '../engine/decode';
+import { discardSession, resumeSession, savedSession } from '../app/session';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { pressHandlers } from '../ui/press';
+import { pendingTool } from './Editor';
+import { reportOpen } from './Switcher';
+import type { ToolId } from '../tools/host';
 import './picker.css';
 
-function nameFor(file: File | Blob, fallback: string) {
-  return file instanceof File && file.name ? file.name : fallback;
+function ago(ms: number) {
+  const m = Math.round((Date.now() - ms) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} hr ago`;
+  const d = Math.round(h / 24);
+  return d === 1 ? 'yesterday' : `${d} days ago`;
 }
 
-/** Opens the first image of a selection (the photo switcher for several arrives in Phase 2). */
-async function openFiles(files: (File | Blob)[], setBusy: (b: boolean) => void) {
-  const images = files.filter((f) => !f.type || f.type.startsWith('image/'));
-  if (!images.length) {
-    await showAlert("This file can't be opened", "It doesn't look like an image.", [{ label: 'OK', style: 'preferred' }]);
+const goToEditor = () => {
+  if (topScreen() !== 'editor') pushScreen('editor');
+};
+
+async function resume() {
+  const tool = await resumeSession();
+  if (!docs.value.length) {
+    showToast({ icon: 'details', title: 'Nothing could be restored', duration: 2600 });
     return;
+  }
+  if (tool) pendingTool.value = tool as ToolId;
+  goToEditor();
+}
+
+/** Opens photos; if last session's photos are waiting, asks what to do with them first. */
+async function open(files: (File | Blob)[], setBusy: (b: boolean) => void) {
+  if (savedSession.value) {
+    const n = savedSession.value.index.ids.length;
+    const r = await showAlert('Unfinished edits', `You have ${n} photo${n === 1 ? '' : 's'} with unfinished edits from last time.`, [
+      { label: 'Keep Them Open Too', style: 'preferred' },
+      { label: 'Discard Them', style: 'destructive' },
+      { label: 'Cancel', style: 'cancel' },
+    ]);
+    if (r === 'Cancel' || r === null) return;
+    if (r === 'Discard Them') await discardSession();
+    else await resumeSession();
   }
   setBusy(true);
   try {
-    const first = images[0];
-    const decoded = await decodeFile(first, nameFor(first, 'Pasted Image'));
-    currentImage.value?.bitmap.close();
-    currentImage.value = decoded;
-    pushScreen('editor');
-    if (images.length > 1) {
-      showToast({ icon: 'photo-stack', title: 'Opened the first photo', subtitle: 'Editing several at once arrives in Phase 2.', duration: 3200 });
-    }
-  } catch (e) {
-    setBusy(false);
-    const err = e instanceof ImageOpenError ? e : new ImageOpenError("This file can't be opened.");
-    await showAlert(err.message.replace(/\.$/, ''), err.detail ?? 'It may be damaged or in a format this iPhone can’t read.', [
-      { label: 'OK', style: 'preferred' },
-    ]);
+    const r = await openFiles(files);
+    reportOpen(r);
+    if (r.opened.length) goToEditor();
   } finally {
     setBusy(false);
   }
@@ -54,7 +73,7 @@ export function Picker() {
       const files = [...(e.clipboardData?.files ?? [])];
       if (files.length) {
         e.preventDefault();
-        void openFiles(files, setBusy);
+        void open(files, setBusy);
       }
     };
     document.addEventListener('paste', onPaste);
@@ -73,7 +92,8 @@ export function Picker() {
         const type = item.types.find((t) => t.startsWith('image/'));
         if (type) {
           const blob = await item.getType(type);
-          await openFiles([blob], setBusy);
+          const ext = type.split('/')[1]?.replace('jpeg', 'jpg') ?? 'png';
+          await open([new File([blob], `Pasted Image.${ext}`, { type })], setBusy);
           return;
         }
       }
@@ -97,6 +117,54 @@ export function Picker() {
     );
   };
 
+  const openNow = docs.value;
+  const saved = savedSession.value;
+
+  const closeOpen = async () => {
+    const dirty = openNow.filter((d) => d.dirty).length;
+    if (dirty) {
+      const r = await showAlert(
+        `Close ${openNow.length === 1 ? 'this photo' : `all ${openNow.length} photos`}?`,
+        `${dirty === 1 ? 'One has' : `${dirty} have`} edits that haven’t been exported. They’ll be lost; your originals aren’t affected.`,
+        [
+          { label: 'Cancel', style: 'cancel' },
+          { label: 'Close', style: 'destructive' },
+        ],
+      );
+      if (r !== 'Close') return;
+    }
+    closeAll();
+  };
+
+  const discard = async () => {
+    const r = await showAlert('Discard unfinished edits?', 'The photos from last time will be removed from PicKit. Your originals aren’t affected.', [
+      { label: 'Cancel', style: 'cancel' },
+      { label: 'Discard', style: 'destructive' },
+    ]);
+    if (r === 'Discard') await discardSession();
+  };
+
+  const card =
+    openNow.length > 0
+      ? {
+          title: 'Continue Editing',
+          sub: `${openNow.length} photo${openNow.length === 1 ? '' : 's'} open`,
+          thumbs: openNow.slice(0, 4).map((d) => ({ id: d.id, name: d.name, canvas: d.raster })),
+          onResume: goToEditor,
+          onClose: () => void closeOpen(),
+          closeLabel: 'Close photos',
+        }
+      : saved
+        ? {
+            title: 'Resume',
+            sub: `${saved.thumbs.length} photo${saved.thumbs.length === 1 ? '' : 's'} · edited ${ago(saved.index.savedAt)}`,
+            thumbs: saved.thumbs.slice(0, 4).map((t) => ({ id: t.id, name: t.name, url: t.url })),
+            onResume: () => void resume(),
+            onClose: () => void discard(),
+            closeLabel: 'Discard unfinished edits',
+          }
+        : null;
+
   return (
     <div
       class="screen picker"
@@ -115,21 +183,44 @@ export function Picker() {
         e.preventDefault();
         setDragging(false);
         const files = [...(e.dataTransfer?.files ?? [])];
-        if (files.length) void openFiles(files, setBusy);
+        if (files.length) void open(files, setBusy);
       }}
     >
       <div class="scroll picker-scroll">
         <div class="nav-scroll-top" />
         <h1 class="large-title t-large-title">PicKit</h1>
-        <div class="picker-empty">
-          <div class="picker-empty-art" aria-hidden="true">
-            <Icon name="photo-stack" />
+        {card && (
+          <div class="list">
+            <section class="section resume" aria-label={card.title}>
+              <div class="section-body resume-card">
+                <button type="button" class="resume-open" onClick={card.onResume} {...pressHandlers()} id="resume">
+                  <span class="resume-thumbs" aria-hidden="true">
+                    {card.thumbs.map((t) => ('url' in t && t.url ? <img src={t.url} alt="" /> : <ThumbCanvas src={(t as { canvas: HTMLCanvasElement }).canvas} />))}
+                  </span>
+                  <span class="resume-text">
+                    <span class="t-headline">{card.title}</span>
+                    <span class="t-subheadline t-secondary">{card.sub}</span>
+                  </span>
+                  <Icon name="chevron-right" class="row-chevron" />
+                </button>
+                <button type="button" class="resume-close" aria-label={card.closeLabel} onClick={card.onClose}>
+                  <Icon name="xmark" />
+                </button>
+              </div>
+            </section>
           </div>
-          <h2 class="t-title2 t-emph">No Photo Open</h2>
-          <p class="t-subheadline t-secondary picker-empty-text">
-            Choose a photo to crop, resize, mark up, compress or clean up. It never leaves this iPhone.
-          </p>
-        </div>
+        )}
+        {!card && (
+          <div class="picker-empty">
+            <div class="picker-empty-art" aria-hidden="true">
+              <Icon name="photo-stack" />
+            </div>
+            <h2 class="t-title2 t-emph">No Photo Open</h2>
+            <p class="t-subheadline t-secondary picker-empty-text">
+              Choose photos to crop, resize, mark up, compress or clean up. They never leave this iPhone.
+            </p>
+          </div>
+        )}
       </div>
 
       <div class="status-scrim on-light" />
@@ -164,7 +255,7 @@ export function Picker() {
           const el = e.currentTarget;
           const files = [...(el.files ?? [])];
           el.value = '';
-          if (files.length) void openFiles(files, setBusy);
+          if (files.length) void open(files, setBusy);
         }}
       />
 
@@ -178,4 +269,19 @@ export function Picker() {
       )}
     </div>
   );
+}
+
+function ThumbCanvas({ src }: { src: HTMLCanvasElement }) {
+  const c = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const el = c.current!;
+    const k = Math.min(1, 160 / Math.max(src.width, src.height));
+    el.width = Math.max(1, Math.round(src.width * k));
+    el.height = Math.max(1, Math.round(src.height * k));
+    el.getContext('2d')!.drawImage(src, 0, 0, el.width, el.height);
+    return () => {
+      el.width = el.height = 0;
+    };
+  }, [src]);
+  return <canvas ref={c} />;
 }

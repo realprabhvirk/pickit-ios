@@ -9,7 +9,6 @@ import { Settings } from '../screens/Settings';
 import { About } from '../screens/About';
 import { Offline } from '../screens/Offline';
 import { Batch } from '../screens/Batch';
-import { closeCurrentImage } from './editorState';
 
 const RENDER: Record<ScreenName, () => VNode> = {
   picker: () => <Picker />,
@@ -61,7 +60,8 @@ function ScreenFrame({ entry, index }: { entry: ScreenEntry; index: number }) {
     if (entry.style === 'push') {
       const w = width();
       x.current = new SpringValue(w, (v) => {
-        node.style.transform = `translate3d(${v.toFixed(2)}px,0,0)`;
+        // At rest, no transform at all: text then renders at full sharpness.
+        node.style.transform = Math.abs(v) < 0.01 ? '' : `translate3d(${v.toFixed(2)}px,0,0)`;
         placeBelow(frameBelow(entry.key), v, width());
       }, springs.smooth, 0.5);
       if (prefersReducedMotion()) {
@@ -84,10 +84,8 @@ function ScreenFrame({ entry, index }: { entry: ScreenEntry; index: number }) {
   useEffect(() => {
     if (!entry.leaving) return;
     const node = el.current!;
-    const done = () => {
-      if (entry.name === 'editor') closeCurrentImage();
-      removeScreen(entry.key);
-    };
+    // Photos stay open when the editor is left; the picker offers to go back to them.
+    const done = () => removeScreen(entry.key);
     if (entry.style === 'push' && x.current) {
       const v = popVelocity;
       popVelocity = 0;

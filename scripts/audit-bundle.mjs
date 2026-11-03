@@ -20,6 +20,7 @@ const ALLOW = [
   /^https:\/\/github\.com\/realprabhvirk\//, // our own repo links in About text
   /^https:\/\/chromium\.googlesource\.com\/webm\/libwebp$/, // licence list text
   /^https:\/\/bit\.ly\/wb-precache$/, // Workbox error-message text
+  /^http:\/\/ns\.adobe\.com\/xap$/, // XMP signature the metadata stripper looks for inside photo bytes
   // "Resize for" preset citations from presets.json (copied as-is from PicKit for Windows).
   // Shown as text, never fetched.
   /^https:\/\/buffer\.com\/resources\/ideal-cover-photo-size\/$/,

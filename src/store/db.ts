@@ -4,8 +4,9 @@
  * must never stop the editor.
  */
 const DB_NAME = 'pickit';
-const DB_VERSION = 1;
-export const STORES = ['kv'] as const;
+const DB_VERSION = 2;
+/** kv: settings and the session index. docs: autosaved photos. spill: undo steps moved out of memory. */
+export const STORES = ['kv', 'docs', 'spill'] as const;
 type StoreName = (typeof STORES)[number];
 
 let dbPromise: Promise<IDBDatabase> | null = null;
@@ -55,6 +56,30 @@ export async function setItem(key: string, value: unknown, store: StoreName = 'k
     return true;
   } catch {
     return false;
+  }
+}
+
+export async function deleteItem(key: string, store: StoreName = 'kv'): Promise<void> {
+  try {
+    await tx(store, 'readwrite', (s) => s.delete(key));
+  } catch {
+    /* already gone */
+  }
+}
+
+export async function keys(store: StoreName): Promise<string[]> {
+  try {
+    return (await tx(store, 'readonly', (s) => s.getAllKeys())) as string[];
+  } catch {
+    return [];
+  }
+}
+
+export async function clearStore(store: StoreName): Promise<void> {
+  try {
+    await tx(store, 'readwrite', (s) => s.clear());
+  } catch {
+    /* nothing to clear */
   }
 }
 

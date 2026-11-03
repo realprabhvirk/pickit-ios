@@ -32,6 +32,8 @@ export interface AlertState {
   message?: string;
   actions: AlertAction[];
   resolve: (label: string | null) => void;
+  /** A text field, for prompts (rename). */
+  input?: { value: string; placeholder?: string; onInput: (v: string) => void };
 }
 
 export const alert = signal<AlertState | null>(null);
@@ -40,6 +42,23 @@ export const alert = signal<AlertState | null>(null);
 export function showAlert(title: string, message: string | undefined, actions: AlertAction[]): Promise<string | null> {
   return new Promise((resolve) => {
     alert.value = { title, message, actions, resolve };
+  });
+}
+
+/** A one-field prompt. Resolves with the text, or null if cancelled. */
+export function showPrompt(title: string, message: string | undefined, value: string, okLabel = 'Save'): Promise<string | null> {
+  let current = value;
+  return new Promise((resolve) => {
+    alert.value = {
+      title,
+      message,
+      actions: [
+        { label: 'Cancel', style: 'cancel' },
+        { label: okLabel, style: 'preferred' },
+      ],
+      input: { value, onInput: (v) => (current = v) },
+      resolve: (label) => resolve(label === okLabel ? current : null),
+    };
   });
 }
 

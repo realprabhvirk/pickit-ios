@@ -6,7 +6,9 @@ export type IconName =
   | 'crop' | 'resize' | 'rotate' | 'markup' | 'privacy' | 'background' | 'compress' | 'resize-for' | 'details'
   | 'photo' | 'photo-stack' | 'paste' | 'gear' | 'stack' | 'add-home' | 'grid'
   | 'drop' | 'location-slash' | 'wifi-slash' | 'drive' | 'motion' | 'waveform' | 'doc' | 'lock' | 'slider'
-  | 'arrow-down-circle' | 'trash';
+  | 'arrow-down-circle' | 'trash'
+  | 'rotate-left' | 'flip-h' | 'flip-v' | 'highlighter' | 'arrow' | 'line' | 'square' | 'rounded' | 'circle' | 'text'
+  | 'eraser' | 'select' | 'brush' | 'plus-circle' | 'minus-circle' | 'copy' | 'folder' | 'pencil' | 'zip';
 
 /** Puts the one icon sprite into the document, once. Every <Icon> references a symbol in it. */
 export function installIconSprite() {

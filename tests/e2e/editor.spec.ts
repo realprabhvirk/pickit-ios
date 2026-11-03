@@ -62,7 +62,7 @@ test('damaged and fake files fail with a clear message, not a hang', async ({ pa
     await page.locator('input[type=file]').setInputFiles(`tests/fixtures/${name}`);
     const alert = page.getByRole('alertdialog');
     await expect(alert).toBeVisible({ timeout: 25_000 });
-    await expect(alert).toContainText("can't be opened");
+    await expect(alert).toContainText(/can.t be opened/);
     await alert.getByRole('button', { name: 'OK' }).click();
     await expect(alert).toHaveCount(0);
   }
@@ -75,8 +75,8 @@ test('the back gesture closes the top layer instead of leaving the app', async (
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.goBack();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Close' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close', exact: true })).toBeVisible();
   await page.goBack();
-  await expect(page.getByRole('button', { name: 'Close' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'PicKit' })).toBeVisible();
 });

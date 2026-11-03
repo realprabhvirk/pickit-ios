@@ -26,7 +26,7 @@ test('makes no request to any other origin', async ({ page, baseURL }) => {
     await page.getByRole('dialog').getByRole('button').first().click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
   }
-  await page.getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('menuitem', { name: 'Settings' }).click();
   await page.locator('#row-offline').click();

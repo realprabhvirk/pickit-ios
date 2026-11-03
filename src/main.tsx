@@ -13,6 +13,7 @@ import { startPwa } from './app/pwa';
 import { setHapticsEnabled } from './ui/haptics';
 import { enableMotionTilt, resumeMotionTiltIfAllowed, startPointerTilt } from './app/tilt';
 import { maybeShowInstallHelp } from './app/installHelp';
+import { loadSessionSummary, startAutosave } from './app/session';
 
 const root = document.documentElement;
 root.dataset.standalone = String(isStandalone());
@@ -35,6 +36,9 @@ effect(() => {
 const app = document.getElementById('app')!;
 trackKeyboard(app);
 render(<App />, app);
+
+// Offer last session's photos on the picker, then keep saving whatever is open.
+void loadSessionSummary().finally(startAutosave);
 
 void loadSettings().then(() => {
   maybeShowInstallHelp();

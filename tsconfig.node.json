@@ -21,6 +21,7 @@
     "vite.config.ts",
     "playwright.config.ts",
     "tests/e2e",
-    "tests/unit"
+    "tests/unit",
+    "src/globals.d.ts"
   ]
 }

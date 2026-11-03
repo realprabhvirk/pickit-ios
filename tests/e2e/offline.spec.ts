@@ -23,8 +23,15 @@ test('installs the service worker, verifies the precache, and works fully offlin
   const c = await canvasCentre(page);
   expect(c.r + c.g + c.b).toBeGreaterThan(30);
 
+  // Exporting works with no network: the WASM encoders come from the cache.
+  await page.getByRole('button', { name: 'Export or share' }).click();
+  await page.getByRole('dialog', { name: 'Export' }).getByRole('radio', { name: 'WebP' }).click();
+  await expect(page.locator('.estimate-size')).toBeVisible({ timeout: 60_000 });
+  await page.getByRole('dialog').getByRole('button').first().click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
   // The encoders still load and run with no network.
-  await page.getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('menuitem', { name: 'Settings' }).click();
   await page.locator('#row-offline').click();

@@ -38,7 +38,7 @@ export async function waitForServiceWorker(page: Page) {
 export async function openImage(page: Page, name: string) {
   await page.locator('input[type=file]').setInputFiles(fixture(name));
   await expect(page.locator('canvas.editor-canvas')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Close' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close', exact: true })).toBeVisible();
 }
 
 /** Average of the middle of the photo canvas, to prove it actually drew. */

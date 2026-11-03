@@ -10,10 +10,23 @@ interface Pt {
 }
 
 const SMALLEST_SIDE = 128;
+
+/** Pencil pressure when there is one; a steady middle value for fingers and mice. */
+const pressureOf = (e: PointerEvent) => (e.pointerType === 'pen' && e.pressure > 0 ? e.pressure : 0.5);
 const SAMPLE_SIDE = 256;
 const DOUBLE_TAP_MS = 300;
 const DOUBLE_TAP_SLOP = 30;
 const DECAY_PER_MS = 0.998;
+
+/** Single-finger input for the active tool, in image coordinates. Return false from down() to let the finger pan instead. */
+export interface CanvasInput {
+  down(p: { x: number; y: number; pressure: number; pointerType: string }): boolean | void;
+  move(p: { x: number; y: number; pressure: number; pointerType: string }): void;
+  up(p: { x: number; y: number; pressure: number; pointerType: string }): void;
+  cancel(): void;
+}
+
+export type Overlay = (ctx: CanvasRenderingContext2D, view: CanvasView) => void;
 
 export interface CanvasViewEvents {
   /** Zoom or position changed (every frame while moving). */
@@ -53,6 +66,18 @@ export class CanvasView {
   private settleTimer = 0;
   private destroyed = false;
   private tones: (Tone | undefined)[] = [];
+  private overlays = new Set<Overlay>();
+  private listeners = new Set<(v: CanvasView) => void>();
+  private rebuildTimer = 0;
+  private checker: CanvasPattern | null = null;
+  private toolActive = false;
+  /** Single-finger input goes to the tool when set; two fingers always navigate. */
+  input: CanvasInput | null = null;
+  /** Draw a checkerboard under the photo (transparent areas). */
+  transparent = false;
+  /** Straighten preview: rotation in radians and the inner-rectangle scale. */
+  previewRotation = 0;
+  previewScale = 1;
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -85,6 +110,7 @@ export class CanvasView {
     cancelAnimationFrame(this.raf);
     cancelAnimationFrame(this.momentum);
     clearTimeout(this.settleTimer);
+    clearTimeout(this.rebuildTimer);
     this.bounceX.stop();
     this.bounceY.stop();
     this.settleSpring.stop();
@@ -101,14 +127,62 @@ export class CanvasView {
     this.canvas.height = 0;
   }
 
-  /** Show a new image. The view keeps the bitmap; the caller still owns closing it. */
-  setImage(bitmap: ImageBitmap) {
+  /** Show a picture. The caller owns `src` and must keep it alive while shown. */
+  setSource(src: Level, refit = true) {
     this.freeLevels();
-    this.levels = [bitmap];
-    this.vt.setImage(bitmap.width, bitmap.height, true);
+    this.levels = [src];
+    this.vt.setImage(src.width, src.height, refit);
     this.buildLevelsSoon();
     this.requestRender();
     this.queueSettle();
+  }
+
+  /** Back-compat for callers holding an ImageBitmap. */
+  setImage(bitmap: ImageBitmap) {
+    this.setSource(bitmap, true);
+  }
+
+  /**
+   * The picture's pixels changed (or it was swapped for one of another size). Copies made for
+   * zoomed-out drawing are dropped now and rebuilt once things go quiet.
+   */
+  invalidate(src?: Level, opts: { refit?: boolean } = {}) {
+    const next = src ?? this.levels[0];
+    if (!next) return;
+    const sizeChanged = next.width !== this.vt.imageWidth || next.height !== this.vt.imageHeight;
+    this.freeLevels();
+    this.levels = [next];
+    if (sizeChanged) this.vt.setImage(next.width, next.height, opts.refit ?? true);
+    clearTimeout(this.rebuildTimer);
+    this.rebuildTimer = window.setTimeout(() => this.buildLevelsSoon(), 220);
+    this.requestRender();
+    this.queueSettle();
+  }
+
+  addOverlay(fn: Overlay): () => void {
+    this.overlays.add(fn);
+    this.requestRender();
+    return () => {
+      this.overlays.delete(fn);
+      this.requestRender();
+    };
+  }
+
+  subscribe(fn: (v: CanvasView) => void): () => void {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+
+  /** Image coordinates under a point on screen. */
+  clientToImage(clientX: number, clientY: number) {
+    const r = this.canvas.getBoundingClientRect();
+    return this.vt.viewToImage(clientX - r.left, clientY - r.top);
+  }
+
+  /** Screen rectangle (CSS px, relative to the canvas) of an image rectangle. */
+  imageRectToView(x: number, y: number, w: number, h: number) {
+    const a = this.vt.imageToView(x, y);
+    return { x: a.x, y: a.y, w: w * this.vt.zoom, h: h * this.vt.zoom };
   }
 
   /**
@@ -222,6 +296,12 @@ export class CanvasView {
     const src = this.levels[0];
     if (!src) return;
     const dpr = vt.dpr;
+    if (this.previewRotation) {
+      this.renderRotated();
+      this.events.onChange?.(this);
+      for (const l of this.listeners) l(this);
+      return;
+    }
     const deviceZoom = vt.zoom * dpr;
     const img = this.levelFor(deviceZoom);
     const iw = img.width;
@@ -238,8 +318,14 @@ export class CanvasView {
     const sy0 = Math.max(0, (-dy / dh) * ih);
     const sx1 = Math.min(iw, ((canvas.width - dx) / dw) * iw);
     const sy1 = Math.min(ih, ((canvas.height - dy) / dh) * ih);
-    if (sx1 <= sx0 || sy1 <= sy0) return;
+    if (sx1 <= sx0 || sy1 <= sy0) {
+      this.drawOverlays(dx, dy, vt.zoom * dpr);
+      this.events.onChange?.(this);
+      for (const l of this.listeners) l(this);
+      return;
+    }
 
+    if (this.transparent) this.drawChecker(Math.max(0, dx), Math.max(0, dy), Math.min(canvas.width, dx + dw) - Math.max(0, dx), Math.min(canvas.height, dy + dh) - Math.max(0, dy));
     ctx.imageSmoothingEnabled = deviceZoom < 3;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(
@@ -253,7 +339,69 @@ export class CanvasView {
       ((sx1 - sx0) / iw) * dw,
       ((sy1 - sy0) / ih) * dh,
     );
+    this.drawOverlays(dx, dy, vt.zoom * dpr);
     this.events.onChange?.(this);
+    for (const l of this.listeners) l(this);
+  }
+
+  private drawOverlays(dx: number, dy: number, k: number) {
+    if (!this.overlays.size) return;
+    const ctx = this.ctx;
+    for (const o of this.overlays) {
+      ctx.save();
+      ctx.setTransform(k, 0, 0, k, dx, dy);
+      o(ctx, this);
+      ctx.restore();
+    }
+  }
+
+  private drawChecker(x: number, y: number, w: number, h: number) {
+    if (w <= 0 || h <= 0) return;
+    const ctx = this.ctx;
+    if (!this.checker) {
+      const cell = Math.round(8 * this.vt.dpr);
+      const t = document.createElement('canvas');
+      t.width = t.height = cell * 2;
+      const tc = t.getContext('2d')!;
+      tc.fillStyle = '#ffffff';
+      tc.fillRect(0, 0, cell * 2, cell * 2);
+      tc.fillStyle = '#d6d6db';
+      tc.fillRect(0, 0, cell, cell);
+      tc.fillRect(cell, cell, cell, cell);
+      this.checker = ctx.createPattern(t, 'repeat');
+    }
+    if (!this.checker) return;
+    ctx.fillStyle = this.checker;
+    ctx.fillRect(x, y, w, h);
+  }
+
+  /** Straighten preview: what the result will look like, inside the photo's frame. */
+  private renderRotated() {
+    const { ctx, vt } = this;
+    const dpr = vt.dpr;
+    const k = vt.zoom * dpr;
+    const dx = vt.offsetX * dpr;
+    const dy = vt.offsetY * dpr;
+    const w = vt.imageWidth;
+    const h = vt.imageHeight;
+    ctx.save();
+    ctx.setTransform(k, 0, 0, k, dx, dy);
+    ctx.beginPath();
+    ctx.rect(0, 0, w, h);
+    ctx.clip();
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(this.previewRotation);
+    ctx.scale(1 / this.previewScale, 1 / this.previewScale);
+    ctx.translate(-w / 2, -h / 2);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(this.levelFor(k / this.previewScale), 0, 0, w, h);
+    for (const o of this.overlays) {
+      ctx.save();
+      o(ctx, this);
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   /** The smallest copy that still has at least one pixel per device pixel. */
@@ -269,6 +417,7 @@ export class CanvasView {
 
   private buildLevelsSoon() {
     const src = this.levels[0];
+    if (!src || this.levels.length > 1) return;
     const step = () => {
       if (this.destroyed || this.levels[0] !== src) return;
       const prev = this.levels[this.levels.length - 1];
@@ -408,11 +557,25 @@ export class CanvasView {
     this.stopMotion();
     const p = this.local(e);
     this.pointers.set(e.pointerId, p);
+    if (this.pointers.size === 1 && this.input) {
+      const ip = this.vt.viewToImage(p.x, p.y);
+      const taken = this.input.down({ ...ip, pressure: pressureOf(e), pointerType: e.pointerType });
+      if (taken !== false) {
+        this.toolActive = true;
+        return;
+      }
+    }
     this.vt.isFitted = false;
     if (this.pointers.size === 1) {
       this.beginPan(p);
       this.tap = { t: performance.now(), p, moved: false };
     } else if (this.pointers.size === 2) {
+      if (this.toolActive) {
+        // A second finger means navigate, not draw.
+        this.input?.cancel();
+        this.toolActive = false;
+      }
+      this.vt.isFitted = false;
       this.tap = null;
       this.beginPinch();
     }
@@ -422,6 +585,11 @@ export class CanvasView {
     if (!this.pointers.has(e.pointerId)) return;
     const p = this.local(e);
     this.pointers.set(e.pointerId, p);
+    if (this.toolActive && this.input) {
+      const ip = this.vt.viewToImage(p.x, p.y);
+      this.input.move({ ...ip, pressure: pressureOf(e), pointerType: e.pointerType });
+      return;
+    }
     if (this.tap && Math.hypot(p.x - this.tap.p.x, p.y - this.tap.p.y) > 8) this.tap.moved = true;
 
     if (this.pinch && this.pointers.size >= 2) {
@@ -444,6 +612,14 @@ export class CanvasView {
     if (!this.pointers.has(e.pointerId)) return;
     const p = this.local(e);
     this.pointers.delete(e.pointerId);
+
+    if (this.toolActive) {
+      this.toolActive = false;
+      const ip = this.vt.viewToImage(p.x, p.y);
+      if (e.type === 'pointercancel') this.input?.cancel();
+      else this.input?.up({ ...ip, pressure: pressureOf(e), pointerType: e.pointerType });
+      return;
+    }
 
     if (this.pointers.size === 1) {
       // Lifted one finger of a pinch: carry on panning with the other.

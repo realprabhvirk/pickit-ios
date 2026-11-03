@@ -6,6 +6,7 @@ import { appVersion, isStandalone } from '../app/env';
 import { enableMotionTilt, disableMotionTilt } from '../app/tilt';
 import { openInstallHelp } from '../app/installHelp';
 import { clearAllData } from '../store/db';
+import { savedSession } from '../app/session';
 import { DEFAULT_SETTINGS, settings, TINTS, updateSettings, type ExportFormat } from '../store/settings';
 import { NavScreen } from '../ui/NavScreen';
 import { Row, Section } from '../ui/List';
@@ -13,7 +14,7 @@ import { Segmented } from '../ui/Segmented';
 import { Slider } from '../ui/Slider';
 import { Switch } from '../ui/Switch';
 import { setHapticsEnabled, haptic } from '../ui/haptics';
-import { formatBytes } from './DetailsSheet';
+import { formatBytes } from '../engine/format';
 import './settings.css';
 
 export function offlineDetail(): string {
@@ -63,7 +64,7 @@ export function Settings() {
   const clearData = async () => {
     const r = await showAlert(
       'Clear Stored Data?',
-      'This removes your settings, recent items and any saved session from this iPhone. Your photos aren’t affected. PicKit itself stays available offline.',
+      'This removes your settings, saved unfinished edits and undo data from this iPhone. Photos open right now stay open. Your originals aren’t affected, and PicKit itself stays available offline.',
       [
         { label: 'Cancel', style: 'cancel' },
         { label: 'Clear', style: 'destructive' },
@@ -71,6 +72,7 @@ export function Settings() {
     );
     if (r !== 'Clear') return;
     await clearAllData();
+    savedSession.value = null;
     updateSettings({ ...DEFAULT_SETTINGS, installHelpSeen: true });
     setHapticsEnabled(false);
     disableMotionTilt();
@@ -155,7 +157,7 @@ export function Settings() {
           header="Offline & Storage"
           footer={
             isStandalone()
-              ? 'Installed apps keep their storage. Clearing stored data doesn’t remove PicKit or your photos.'
+              ? 'Unfinished edits are saved on this iPhone, so you can resume if iOS closes PicKit. Installed apps keep their storage.'
               : 'In a Safari tab, iOS may clear stored data after 7 days without a visit. Add PicKit to your Home Screen to keep it.'
           }
         >

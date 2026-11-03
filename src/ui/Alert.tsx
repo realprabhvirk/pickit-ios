@@ -38,7 +38,11 @@ function AlertDialog({ state }: { state: AlertState }) {
     dim.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'both' });
     springAnimate(panel.current!, [{ opacity: 0, transform: 'scale(1.12)' }, { opacity: 1, transform: 'scale(1)' }], { response: 0.3, damping: 0.9 });
     unregister.current = pushBack(() => finish(null, true));
-    (panel.current!.querySelector('.alert-btn') as HTMLElement | null)?.focus({ preventScroll: true });
+    const field = panel.current!.querySelector('input');
+    if (field) {
+      field.focus();
+      field.select();
+    } else (panel.current!.querySelector('.alert-btn') as HTMLElement | null)?.focus({ preventScroll: true });
   }, []);
 
   const stacked = state.actions.length > 2 || state.actions.some((a) => a.label.length > 14);
@@ -53,6 +57,24 @@ function AlertDialog({ state }: { state: AlertState }) {
           <p id="alert-message" class="alert-message">
             {state.message}
           </p>
+        )}
+        {state.input && (
+          <input
+            class="alert-input"
+            type="text"
+            defaultValue={state.input.value}
+            placeholder={state.input.placeholder}
+            autocomplete="off"
+            spellcheck={false}
+            aria-label={state.title}
+            onInput={(e) => state.input!.onInput((e.currentTarget as HTMLInputElement).value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const ok = state.actions.find((a) => a.style === 'preferred');
+                if (ok) finish(ok.label);
+              }
+            }}
+          />
         )}
         <div class={`alert-actions${stacked ? ' stacked' : ''}`}>
           {state.actions.map((a) => (

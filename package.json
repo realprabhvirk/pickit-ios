@@ -1,7 +1,7 @@
 {
   "name": "pickit-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "PicKit for iOS: an offline photo editor that installs to the iPhone Home Screen.",
   "license": "MIT",
   "type": "module",

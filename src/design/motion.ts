@@ -292,5 +292,19 @@ export function springAnimate(
     return el.animate(fade, { duration: 180, easing: 'ease-out', fill: 'both', ...extra });
   }
   const { easing, duration } = springEasing(p);
-  return el.animate(keyframes, { duration: duration * 1000, easing, fill: 'both', ...extra });
+  const a = el.animate(keyframes, { duration: duration * 1000, easing, fill: 'both', ...extra });
+  // Once finished, write the end state as plain styles and drop the animation. A finished
+  // animation left holding a transform keeps its own layer, which WebKit can rasterise soft.
+  a.finished.then(
+    () => {
+      try {
+        if (el.isConnected) a.commitStyles();
+        a.cancel();
+      } catch {
+        /* element went away */
+      }
+    },
+    () => {},
+  );
+  return a;
 }

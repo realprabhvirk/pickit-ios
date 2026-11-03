@@ -1,46 +1,61 @@
-# Real-device check: Phase 0
+# Real-device check
 
-Playwright runs on Linux and isn't iOS Safari. These need your iPhone 14 Pro. Deploy first (README > Deploy), then go through the list and report back what you see. Anything that fails, a screenshot helps.
+Playwright runs on Linux and isn't iOS Safari. These need an iPhone. Deploy first (README > Deploy), delete any old PicKit icon, add it to the Home Screen again, then go through the list. Anything that fails, a screenshot helps.
 
 ## 1. Install and offline
 
-- [ ] Open the site in Safari. The **Add PicKit to your Home Screen** sheet appears once. Do the steps it describes. On iOS 26, is **Open as Web App** there and on by default?
-- [ ] Launch from the Home Screen: no Safari chrome, the launch image is plain white (light) or black (dark), then the picker.
-- [ ] Settings (••• > Settings) > **Ready Offline** says **Ready**. Tap it: Status **Ready Offline**, Files Stored **23**, Image Encoders **5 WASM files**, and JPEG, PNG, OxiPNG and WebP all say **Works**.
-- [ ] Turn on **Airplane Mode**. Swipe PicKit away in the app switcher. Open it again from the Home Screen. It opens, you can choose a photo and it shows, and the Offline page still shows all four encoders **Works**.
-- [ ] Settings > **Keep Storage**: what does it say? (Informational; nothing depends on it.)
+- [ ] Launch from the Home Screen: no Safari chrome, plain white (light) or black (dark) launch image, then the picker.
+- [ ] Settings > **Ready Offline** says **Ready**. Tap it: every file stored, and JPEG, PNG, OxiPNG and WebP all **Works**.
+- [ ] **Airplane Mode** on, swipe PicKit away, open it again. Open a photo, edit it, and Export as WebP: the size appears and Share works.
 
-## 2. Status bar (the black-translucent decision)
+## 2. Editing
 
-- [ ] Light mode, picker and Settings: can you read the time and battery at the top? There's a dark scrim behind them. Does it look acceptable or wrong?
-- [ ] Dark mode, same screens: status bar readable, and no scrim visible.
-- [ ] Editor, both modes, with a bright photo and a dark photo: status bar readable?
+- [ ] **Crop**: drag corners and edges (they're easy to grab), switch to Square, move the frame, ✓. Undo puts it back.
+- [ ] **Resize**: type a width in mm; the keyboard doesn't hide the field. Enlarging shows a warning.
+- [ ] **Rotate**: Left, Right, both flips; straighten with the slider and see the live preview with the grid.
+- [ ] **Markup**: draw with a finger; pinch with two fingers zooms instead of drawing. Arrow, rectangle, ellipse, highlighter. Text: tap, type, change the font, Done; the keyboard bar stays above the keyboard. Select a drawing, drag it, change its colour, delete it. Eraser cuts a pen line.
+- [ ] **Undo/redo** buttons step through all of the above.
+- [ ] **Resize For**: pick Instagram Portrait; the frame shows what's kept and the note says what's cut.
+- [ ] **Photo switcher**: open three photos, switch between them; each keeps its own edits and undo.
+- [ ] **Rename**: tap the name at the top.
 
-If the light-mode scrim looks bad, I'll switch to `default` (opaque bar, black text in light mode); that needs one rebuild and re-adding to the Home Screen.
+## 3. Privacy
 
-## 3. Glass
+- [ ] **Privacy > Redact** a box over something, export, open the export in Photos and zoom in: solid black.
+- [ ] **Blur** and **Pixelate** with the brush.
+- [ ] Open a photo taken with Location Services on. **Details** shows its location and camera. **Make a Copy Without Details**, share it to Files, then check it in Photos (swipe up / ⓘ): no location. A normal export also has none, unless "Remove Location & Camera Info" is off.
+- [ ] HEIC originals: the clean copy says it was re-encoded as JPEG.
 
-- [ ] In the editor, open a **bright** photo (sky, snow, a white wall) and a **dark** one (night). The top buttons and the bottom toolbar should flip between black and white icons and stay readable in both. Any control hard to read?
-- [ ] Does the glass look like glass (blurred, slightly bright edge, soft highlight top-left), or flat and grey?
-- [ ] Settings > **Motion-Reactive Glass** on: iOS asks for motion access. After allowing, tilting the phone moves the highlight on the glass buttons. Subtle is right; tell me if it's too much or invisible.
-- [ ] Turn on **Settings > Accessibility > Display & Text Size > Increase Contrast** (and separately **Reduce Transparency**): glass becomes solid with the same shapes.
+## 4. Background
 
-## 4. Gestures and motion
+- [ ] **Remove** brush over the background shows a checkerboard; **Keep** brings it back; the brush stays the same size on screen when zoomed. ✓, then Export as PNG: transparency is kept. JPEG says transparent areas become white.
 
-- [ ] Editor: pinch zooms around your fingers, pan follows 1:1, a flick carries on and slows down, edges rubber-band and spring back. Double-tap toggles fit and 100%.
-- [ ] Any stutter while pinching or panning a big photo? (Note: Safari may run page animations at 60 Hz even on ProMotion unless a Safari feature flag is changed, so 60 is acceptable; jank is not.)
-- [ ] Tap a tool: the toolbar gives way and a sheet rises from where it was. Drag the sheet by its top to large and back; flick it down to dismiss; grab it while it's moving. The photo stays visible above it and refits as it moves.
-- [ ] Settings: the Large Title collapses into the bar as you scroll; swipe from the left edge to go back (installed app only).
-- [ ] Slider: drag the thumb; it grows into a lens while dragging.
+## 5. Export
 
-## 5. Big photos
+- [ ] **Share** opens the iOS share sheet immediately (Save Image, AirDrop, Messages). It must not say the action isn't allowed.
+- [ ] **Copy**, then paste into Notes or Messages.
+- [ ] **Save** offers Save to Files.
+- [ ] **Compress** to 250 KB: the result fits, and the size shown matches the file.
 
-- [ ] Open a **48 MP** photo. On the 14 Pro that's a ProRAW shot (Camera > Settings > Formats > ProRAW & Resolution Control, 48 MP), or HEIF Max if your iOS offers it. It should show a **Reduced to 16.7 MP for editing** notice and display correctly (not blank), and Details shows the original 8064 × 6048. If a ProRAW file won't open at all, or iOS hands over a smaller converted copy, tell me which: both are useful to know.
-- [ ] A normal 12 MP photo opens at full resolution (Details says so).
+## 6. Batch
 
-## 6. Odds and ends
+- [ ] Batch > choose 10+ photos, Compress, run, Cancel halfway, run again; Share them all, and Save as ZIP into Files (it opens in Files).
+- [ ] Rename with `Photo {number}`; a clash is flagged before anything is made. Undo puts the settings back.
 
-- [ ] **Paste** button with an image copied in Photos: iOS shows its Paste prompt, then the image opens.
-- [ ] Rotate the phone to landscape: a polite "Rotate to portrait" notice, nothing broken.
-- [ ] Settings > **Haptics (Experimental)** on: do you feel a tick when you tap buttons and switches? (Best effort; may do nothing on your iOS version.)
-- [ ] **Text Size** at the two largest settings (without and with Larger Accessibility Sizes): text grows; anything clipped or overlapping?
+## 7. Resume
+
+- [ ] Edit two photos, swipe PicKit away, open it again: the picker offers **Resume**, and the edits are there (undo history starts fresh).
+
+## 8. Big photos and memory
+
+- [ ] Open a **48 MP** photo (ProRAW on the 14 Pro, or HEIF Max if your iOS offers it): a **Reduced to 16.7 MP for editing** notice, the photo shows (not blank), Details shows the original 8064 × 6048. Crop and export it without the app reloading.
+- [ ] Open five 12 MP photos and edit each: no reload. If PicKit says memory is full, that's expected; tell me how many it took.
+
+## 9. Look and feel
+
+- [ ] Status bar readable on the picker, Settings and editor, light and dark (light screens have a dark scrim behind it). Say if the scrim looks wrong.
+- [ ] Glass readable over a bright photo and a dark one; icons flip between black and white.
+- [ ] Text in the name capsule at the top is sharp, not soft.
+- [ ] Gestures: pinch, pan and flick feel smooth; sheets drag and flick between half and full height; Settings swipes back from the left edge.
+- [ ] Rotate to landscape: a polite notice, nothing broken.
+- [ ] Largest text sizes: nothing clipped or overlapping.

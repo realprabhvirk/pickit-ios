@@ -4,7 +4,7 @@ import { offline, verifyOffline } from '../app/pwa';
 import { checkCodecs, type CodecCheck } from '../engine/codecs';
 import { NavScreen } from '../ui/NavScreen';
 import { Row, Section } from '../ui/List';
-import { formatBytes } from './DetailsSheet';
+import { formatBytes } from '../engine/format';
 import './settings.css';
 
 /** Proof, not promise: lists what's stored and runs every image encoder from the cache. */

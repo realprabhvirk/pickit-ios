@@ -55,5 +55,25 @@
   <symbol id="i-slider" viewBox="0 0 24 24"><path class="pks" d="M3.5 7h9M17.5 7h3M3.5 17h3M11.5 17h9"/><circle class="pks" cx="15" cy="7" r="2.4"/><circle class="pks" cx="9" cy="17" r="2.4"/></symbol>
   <symbol id="i-arrow-down-circle" viewBox="0 0 24 24"><circle class="pks" cx="12" cy="12" r="9"/><path class="pks" d="M12 7.5v8.5M8.4 12.6L12 16.2l3.6-3.6"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><path class="pks" d="M4.5 6.5h15M9.5 6.5v-2a1 1 0 011-1h3a1 1 0 011 1v2M6.5 6.5l.9 12.7a1.5 1.5 0 001.5 1.3h6.2a1.5 1.5 0 001.5-1.3l.9-12.7M10 10.5v6M14 10.5v6"/></symbol>
+  <!-- Tool options -->
+  <symbol id="i-rotate-left" viewBox="0 0 24 24"><g transform="translate(24 0) scale(-1 1)"><rect class="pks" x="3.5" y="10" width="11" height="10.5" rx="2.2"/><path class="pks" d="M10.5 5.5H14a5 5 0 015 5V13"/><path class="pks" d="M16.4 10.6L19 13.2l2.6-2.6"/></g></symbol>
+  <symbol id="i-flip-h" viewBox="0 0 24 24"><path class="pks" d="M12 3v18" style="stroke-dasharray:2 2.6"/><path class="pks" d="M9 6.5L3.5 17.5H9z"/><path class="pkf" d="M15 6.5l5.5 11H15z"/></symbol>
+  <symbol id="i-flip-v" viewBox="0 0 24 24"><g transform="rotate(90 12 12)"><path class="pks" d="M12 3v18" style="stroke-dasharray:2 2.6"/><path class="pks" d="M9 6.5L3.5 17.5H9z"/><path class="pkf" d="M15 6.5l5.5 11H15z"/></g></symbol>
+  <symbol id="i-highlighter" viewBox="0 0 24 24"><path class="pks" d="M6.5 17.5l1.8-4.6 8.1-8.1a1.9 1.9 0 012.7 0l.1.1a1.9 1.9 0 010 2.7l-8.1 8.1z"/><path class="pks" d="M3.5 20.5h8" style="stroke-width:2.6"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path class="pks" d="M5.5 18.5L18 6M9.5 5.5H18.5V14.5"/></symbol>
+  <symbol id="i-line" viewBox="0 0 24 24"><path class="pks" d="M5 19L19 5"/></symbol>
+  <symbol id="i-square" viewBox="0 0 24 24"><rect class="pks" x="4.5" y="4.5" width="15" height="15" rx="1.5"/></symbol>
+  <symbol id="i-rounded" viewBox="0 0 24 24"><rect class="pks" x="4.5" y="4.5" width="15" height="15" rx="5"/></symbol>
+  <symbol id="i-circle" viewBox="0 0 24 24"><circle class="pks" cx="12" cy="12" r="8"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path class="pks" d="M5.5 6.5V5h13v1.5M12 5v14M9 19h6"/></symbol>
+  <symbol id="i-eraser" viewBox="0 0 24 24"><path class="pks" d="M15.6 4.2l4.2 4.2a1.8 1.8 0 010 2.5l-7.6 7.6H8.1l-3.9-3.9a1.8 1.8 0 010-2.5l8.9-7.9a1.8 1.8 0 012.5 0zM9.6 8.9l5.5 5.5M12.2 18.5h7.3"/></symbol>
+  <symbol id="i-select" viewBox="0 0 24 24"><path class="pks" d="M6.5 3.5v14.2l3.6-3.4 2.6 5.9 2.3-1-2.6-5.8 5-.3z"/></symbol>
+  <symbol id="i-brush" viewBox="0 0 24 24"><path class="pks" d="M19.8 4.2a1.6 1.6 0 00-2.3 0l-7.9 8.4 1.8 1.8 8.4-7.9a1.6 1.6 0 000-2.3z"/><path class="pks" d="M9.6 12.6c-2.4-.3-4.4 1.4-4.6 3.9-.1 1.4-.8 2.5-1.9 3.1 3.6 1.1 7.4.1 8.3-3.2"/></symbol>
+  <symbol id="i-plus-circle" viewBox="0 0 24 24"><circle class="pks" cx="12" cy="12" r="8.8"/><path class="pks" d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-minus-circle" viewBox="0 0 24 24"><circle class="pks" cx="12" cy="12" r="8.8"/><path class="pks" d="M8 12h8"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect class="pks" x="8.5" y="8" width="11.5" height="12.5" rx="2.2"/><path class="pks" d="M15.5 8V5.7a2.2 2.2 0 00-2.2-2.2H6.2A2.2 2.2 0 004 5.7v8.1A2.2 2.2 0 006.2 16h2.3"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path class="pks" d="M3.5 7.2a2 2 0 012-2h3.8l2.1 2.2h7.1a2 2 0 012 2v8.4a2 2 0 01-2 2H5.5a2 2 0 01-2-2z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path class="pks" d="M4.5 19.5l.8-3.9L15.6 5.3a2 2 0 012.8 0l.3.3a2 2 0 010 2.8L8.4 18.7z"/></symbol>
+  <symbol id="i-zip" viewBox="0 0 24 24"><path class="pks" d="M14 3H7.5a2 2 0 00-2 2v14a2 2 0 002 2h9a2 2 0 002-2V7.5z"/><path class="pks" d="M11 4v1.6M12.5 6.4v1.6M11 8.8v1.6M12.5 11.2v1.6"/><rect class="pks" x="10" y="14" width="3.6" height="3.4" rx="0.8"/></symbol>
   <symbol id="i-square-and-arrow-up" viewBox="0 0 24 24"><use href="#i-share"/></symbol>
 </svg>

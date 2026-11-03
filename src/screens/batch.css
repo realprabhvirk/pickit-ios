@@ -1,0 +1,71 @@
+.batch-row {
+  min-height: 64px;
+}
+.batch-thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--fill-3);
+}
+.batch-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+.batch-problem {
+  color: var(--red);
+}
+.batch-remove {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--red);
+  font-size: 22px;
+  margin-right: -10px;
+}
+.batch-run {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 0 0 24px;
+  text-align: center;
+}
+.batch-run .btn.large {
+  width: 100%;
+}
+.progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--tint);
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+.list-input {
+  width: 100%;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: var(--fill-3);
+  color: var(--label);
+  font-size: max(16px, 1rem);
+  outline: none;
+}
+.list-input:focus {
+  box-shadow: 0 0 0 2px var(--tint);
+}
+.empty-state .btn.large {
+  margin-top: 16px;
+}
